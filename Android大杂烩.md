@@ -146,3 +146,89 @@ mJmdns.removeServiceListener(type, listener);
 mJmdns.close();  
 lock.release();  
 ```
+
+## 父类调用子类方法
+简单示例
+> 父类的具体实现代码
+
+```java
+abstract public class Fother {
+    public Fother() {
+        System.out.println("the constructor of Fother");
+    }
+
+    abstract String getTime();
+
+    private static Son mSon = new Son("fother invocation son");
+
+    public static void invocationSon(){
+        mSon.getTime();
+        ((Fother)mSon).print();
+    }
+
+    public void print(){
+        System.out.println("fother print");
+    }
+
+}
+```
+> 子类的具体实现代码
+
+```java
+public class Son extends Fother{
+    public Son(String str) {
+        System.out.println(str);
+    }
+
+    @Override
+    String getTime() {
+        return new Date().toString();
+    }
+	
+}
+```
+
+需要注意，在父类中使用子类，需要设为静态，否则会出现stackoverflow错误。
+
+但是为什么要这样写呢？
+**猜测：**
+这样做有一个功能，父类的静态方法想调用自己的非静态方法时，不必将非静态方法设置为静态的之后再调用，而可以通过子类去调用这些非静态方法。
+
+## 抽象类的其他用法
+抽象类
+```java
+abstract public class AbstractDemo {
+    public static AbstractDemo abstractDemo;
+
+    public abstract void print(String str);
+    public abstract void setAge(int age);
+}
+```
+
+初始化
+
+```java
+public class Client {
+    static {
+        AbstractDemo.abstractDemo = new AbstractDemo() {
+            @Override
+            public void print(String str) {
+                System.out.println(str);
+            }
+
+            @Override
+            public void setAge(int age) {
+                System.out.println(age);
+            }
+        };
+    }
+}
+```
+
+调用
+```java
+Client client = new Client();
+AbstractDemo.abstractDemo.print("哦哈哈");
+```
+
+为何这么写？暂不清楚
